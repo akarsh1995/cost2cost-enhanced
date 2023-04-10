@@ -1,64 +1,62 @@
 import os
+from pathlib import Path
+from typing import List, Optional
 import functions_framework
 from http.client import METHOD_NOT_ALLOWED
-from dataclasses import dataclass
+from dataclasses import dataclass, field, asdict
 from urllib.request import urlopen
 from os import getenv
 from pypdf import PdfReader
 from ast import literal_eval
 from io import BytesIO
 import json
+from pprint import pprint
 
 prod = literal_eval(os.environ["PROD"])
 
 
+def clean_id(id: str):
+    return int(literal_eval(id.replace("+", "")))
+
+
+def clean_price(price: str):
+    price = price.replace("..", "").replace("…", "")
+    if price.lower() != "ask":
+        return int(price)
+    return 0
+
+
+def clean_gst(gst_rate: str):
+    return int(gst_rate)
+
+
 @dataclass
 class Product:
-    _id: str = ""
-    _name: str = ""
-    _price: str = ""
-    _category: str = ""
-    _gst: str = ""
-
-    @property
-    def id(self):
-        return int(literal_eval(self._id.replace("+", "")))
-
-    @property
-    def name(self):
-        return self._name
-
-    @property
-    def price(self):
-        if self._price.lower() != "ask":
-            return int(self._price)
-        return self._price.upper()
-
-    @property
-    def category(self):
-        return self._category
-
-    @property
-    def gst(self):
-        return int(self._gst)
+    id: int = 0
+    name: str = ""
+    price: Optional[int] = None
 
     @property
     def is_complete(self):
-        return self._id and self._name and self._price
-
-    def serialize(self):
-        return dict(
-            id=self.id,
-            name=self.name,
-            price=self.price,
-            category=self.category,
-            gst=self.gst,
-        )
+        return self.id and self.name
 
     def __str__(self) -> str:
-        return "\t".join(
-            [str(self.id), self.name, str(self.price), self.category, str(self.gst)]
-        )
+        return "\t".join([str(self.id), str(self.name), str(self.price)])
+
+
+@dataclass
+class Category:
+    category: str = ""
+    gst: int = 0
+    products: List[Product] = field(default_factory=list)
+
+    def add_product(self, pro: Product):
+        self.products.append(pro)
+
+
+@dataclass
+class CategorisedProducts:
+    data: List[Category] = field(default_factory=list)
 
 
 COL_DIST = 185.27999499999999
@@ -83,19 +81,28 @@ def compare_true(x: int, range_var: tuple[range, range, range, range]):
     return any([x in r for r in range_var])
 
 
-parts = [Product()]
-category = ""
-gst_bracket = ""
+categorised_products = CategorisedProducts()
+current_product = Product()
+category = Category()
 
 
 def visitor_body(text: str, cm, tm, fontDict, fontSize):
     text = text.strip()
 
+    global current_product
     global category
     global gst_bracket
     if "%" in text:
-        category = text[:-3].strip()
-        gst_bracket = text[-1 - 2 : -1]
+        if current_product.is_complete:
+            category.add_product(current_product)
+        categorised_products.data.append(
+            Category(
+                category=text[:-3].strip(),
+                gst=int(text[-1 - 2 : -1]),
+            )
+        )
+        current_product = Product()
+        category = categorised_products.data[-1]
 
     x = tm[4]
     y = tm[5]
@@ -103,14 +110,12 @@ def visitor_body(text: str, cm, tm, fontDict, fontSize):
         return
     x = int(x)
 
-    item = parts[-1]
-
     # text
     if compare_true(x, FOUR_COL_TEXT_RANGE):
-        if item.is_complete:
-            parts.append(Product())
-            item = parts[-1]
-        item._name += text
+        if current_product.is_complete:
+            category.add_product(current_product)
+            current_product = Product()
+        current_product.name += text
 
     if (
         text.lower().isdigit()
@@ -121,13 +126,11 @@ def visitor_body(text: str, cm, tm, fontDict, fontSize):
     ):
         # number
         if compare_true(x, FOUR_COL_ID_RANGE):
-            item._id = text
-            item._category = category
-            item._gst = gst_bracket
+            current_product.id = clean_id(text)
 
         # price
         if compare_true(x, FOUR_COL_PRICE_RANGE) or "ask" in text.lower():
-            item._price = text.replace("..", "").replace("…", "")
+            current_product.price = clean_price(text)
 
 
 # Register an HTTP function with the Functions Framework
@@ -137,11 +140,11 @@ def get_pricelist_json():
             data = u.read()
             reader = PdfReader(BytesIO(data))
     else:
-        reader = PdfReader("../try_rust/data/pricelist.pdf")
+        reader = PdfReader("../../try_rust/data/pricelist.pdf")
     for page in reader.pages:
         page.extract_text(visitor_text=visitor_body)
-    return_json = json.dumps(list(map(lambda x: x.serialize(), parts)))
-    parts.clear()
+    categorised_products.data[-1].add_product(current_product)
+    return_json = json.dumps(asdict(categorised_products))
     headers = {"Access-Control-Allow-Origin": "*", "Content-type": "application/json"}
     return (return_json, 200, headers)
 
@@ -155,4 +158,4 @@ def get_pricelist_json_gcloud(request):
 
 if __name__ == "__main__":
     if not prod:
-        print(get_pricelist_json())
+        Path("./data/out.json").write_text(get_pricelist_json()[0])
