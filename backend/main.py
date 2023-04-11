@@ -5,12 +5,10 @@ import functions_framework
 from http.client import METHOD_NOT_ALLOWED
 from dataclasses import dataclass, field, asdict
 from urllib.request import urlopen
-from os import getenv
 from pypdf import PdfReader
 from ast import literal_eval
 from io import BytesIO
 import json
-from pprint import pprint
 
 prod = literal_eval(os.environ["PROD"])
 
