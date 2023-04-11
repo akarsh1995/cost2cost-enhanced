@@ -45,15 +45,17 @@ const TotalPrice: FC<{
             const isPriceZero = data.data[catId].products[pId].price == 0;
             return (
               isChecked && (
-                <div>
+                <div className="flex items-center">
                   <input
+                    className="w-4 h-4"
                     key={key}
                     type="checkbox"
                     checked={isChecked}
                     id={key}
                     name={key}
                     onClick={() => toggleItem(catId, pId)}
-                  />{" "}
+                  />
+                  &nbsp;
                   <label
                     className={isPriceZero ? "text-slate-400" : ""}
                     htmlFor={key}
