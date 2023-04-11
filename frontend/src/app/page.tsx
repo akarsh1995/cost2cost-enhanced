@@ -9,6 +9,7 @@ import DataType, {
 } from "@/types";
 import ProductList from "../components/ProductList";
 import TotalPrice from "@/components/TotalPrice";
+import Accordion from "@/components/Accordion";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -22,32 +23,32 @@ export default function Home() {
     );
 
   return (
-    <main className={inter.className}>
-      {/* <main> */}
-      <div className="sticky top-0 bg-white p-5 min-h-48">
+    <main className={""}>
+      <div className="sticky z-30 top-0 p-5 min-h-48 backdrop-blur-sm">
         <TotalPrice
           products={data}
           itemsChecked={itemsChecked}
           toggleItem={setProductSelectTrue}
         />
       </div>
-      <div className="p-5 md:p-10 space-y-10">
-        {data.data.map((catData, catId) => {
-          return (
-            <div key={`${catId}_${catData.category}`}>
-              <h2 className="text-2xl">{catData.category}</h2>
-              <br />
-              <ProductList
-                selectedProductsMask={itemsChecked.data[catId].products}
-                setItemsChecked={(productId: number) =>
-                  setProductSelectTrue(catId, productId)
-                }
-                categoryData={catData}
-              />
-            </div>
-          );
+      <Accordion
+        items={data.data.map((catData, catId) => {
+          return {
+            heading: catData.category,
+            item: (
+              <div key={`${catId}_${catData.category}`}>
+                <ProductList
+                  selectedProductsMask={itemsChecked.data[catId].products}
+                  setItemsChecked={(productId: number) =>
+                    setProductSelectTrue(catId, productId)
+                  }
+                  categoryData={catData}
+                />
+              </div>
+            ),
+          };
         })}
-      </div>
+      />
     </main>
   );
 }

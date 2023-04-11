@@ -1,3 +1,4 @@
+import { Typography } from "@material-tailwind/react";
 import { FC } from "react";
 
 const Product: FC<{
@@ -6,9 +7,8 @@ const Product: FC<{
   prodId: string;
   label: string;
 }> = ({ isChecked, prodId, onToggle, label }) => {
-  const className = isChecked ? "text-slate-600" : "text-slate-400";
   return (
-    <div key={prodId} className={className}>
+    <div key={prodId}>
       <div className="flex items-center">
         <input
           className="h-7 w-7"
@@ -19,7 +19,11 @@ const Product: FC<{
           onChange={onToggle}
         />{" "}
         &nbsp; &nbsp;
-        <label htmlFor={prodId}>{label}</label>
+        <label htmlFor={prodId}>
+          <Typography variant={isChecked ? "h6" : "paragraph"}>
+            {label}
+          </Typography>
+        </label>
       </div>
     </div>
   );

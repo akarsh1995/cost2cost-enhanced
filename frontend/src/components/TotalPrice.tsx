@@ -1,6 +1,7 @@
 import { FC } from "react";
 import DataType, { SelectMapType, filterDataFromMap } from "@/types";
 import data from "@/data";
+import { Typography } from "@material-tailwind/react";
 
 const fetchStatus = (catId: number, prodId: number, data: SelectMapType) => {
   return data.data[catId].products[prodId];
@@ -35,7 +36,7 @@ const TotalPrice: FC<{
   return (
     <div className="space-y-6">
       <div>
-        Total with GST: <span className="font-bold">{s.toFixed(2)}</span>
+        Total with GST: <Typography variant="h3">{s.toFixed(2)}</Typography>
       </div>
       <div className="grid grid-cols-2 md:grid-cols-3 auto-rows-fr">
         {products.data.map((c, catId) => {
@@ -56,13 +57,14 @@ const TotalPrice: FC<{
                     onClick={() => toggleItem(catId, pId)}
                   />
                   &nbsp;
-                  <label
-                    className={isPriceZero ? "text-slate-400" : ""}
-                    htmlFor={key}
-                  >
-                    {p.name}
+                  <label htmlFor={key}>
+                    {
+                      <Typography variant={isPriceZero ? "paragraph" : "h6"}>
+                        {p.name}
+                        {isPriceZero && <sup>*</sup>}
+                      </Typography>
+                    }
                   </label>
-                  {isPriceZero && <sup className="text-slate-400">*</sup>}
                 </div>
               )
             );
