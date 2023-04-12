@@ -1,0 +1,13 @@
+steps:
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  args:
+  - gcloud
+  - functions
+  - deploy
+  - get_pricelist_json
+  - --source=./backend
+  - --allow-unauthenticated
+  - --trigger-http
+  - --runtime=python310
+  env:
+  - 'PROD=True'
