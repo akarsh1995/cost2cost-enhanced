@@ -5,6 +5,7 @@ steps:
   - functions
   - deploy
   - get_pricelist_json
+  - --gen2
   - --source=./backend
   - --allow-unauthenticated
   - --trigger-http
