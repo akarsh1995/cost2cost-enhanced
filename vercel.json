@@ -1,4 +1,0 @@
-{
-  "buildCommand": "cd ./frontend/ && next build",
-  "framework": "nextjs"
-}
