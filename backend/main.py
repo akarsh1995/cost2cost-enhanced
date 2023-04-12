@@ -9,6 +9,7 @@ from ast import literal_eval
 from io import BytesIO
 import json
 from upload import upload_blob_from_memory
+import gzip
 
 prod = literal_eval(os.environ["PROD"])
 
@@ -154,8 +155,12 @@ def get_pricelist():
 # Register an HTTP function with the Functions Framework
 def get_pricelist_json_out():
     return_json = json.dumps(get_pricelist())
-    headers = {"Access-Control-Allow-Origin": "*", "Content-type": "application/json"}
-    return (return_json, 200, headers)
+    headers = {
+        "Access-Control-Allow-Origin": "*",
+        "Content-Type": "application/json",
+        "Content-Encoding": "gzip",
+    }
+    return (gzip.compress(return_json.encode()), 200, headers)
 
 
 @functions_framework.http
@@ -163,7 +168,12 @@ def get_pricelist_json(request):
     if request.method != "GET":
         return ("Only Get Method Allowed", METHOD_NOT_ALLOWED, {})
     r = get_pricelist_json_out()
-    upload_blob_from_memory(os.environ["BUCKET_ID"], r[0], "price.json")
+    upload_blob_from_memory(
+        os.environ["BUCKET_ID"],
+        r[0],
+        "price.json",
+        {"Content-Type": "application/json", "Content-Encoding": "gzip"},
+    )
     return ({"status": "successfuly uploaded to storage"}, 200, {})
 
 
@@ -174,8 +184,9 @@ if not prod:
 
     @app.route("/")
     def serve_get_pricelist():
+        s = get_pricelist_json_out()
         return (
-            get_pricelist(),
-            200,
-            {"Access-Control-Allow-Origin": "*"},
+            s[0],
+            s[1],
+            s[2],
         )
