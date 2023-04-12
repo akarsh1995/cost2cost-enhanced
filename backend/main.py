@@ -1,5 +1,4 @@
 import os
-from pathlib import Path
 from typing import List, Optional
 import functions_framework
 from http.client import METHOD_NOT_ALLOWED
@@ -9,6 +8,7 @@ from pypdf import PdfReader
 from ast import literal_eval
 from io import BytesIO
 import json
+from upload import upload_blob_from_memory
 
 prod = literal_eval(os.environ["PROD"])
 
@@ -162,7 +162,9 @@ def get_pricelist_json_out():
 def get_pricelist_json(request):
     if request.method != "GET":
         return ("Only Get Method Allowed", METHOD_NOT_ALLOWED, {})
-    return get_pricelist_json_out()
+    r = get_pricelist_json_out()
+    upload_blob_from_memory(os.environ["BUCKET_ID"], r[0], "price.json")
+    return ({"status": "successfuly uploaded to storage"}, 200, {})
 
 
 if not prod:
