@@ -1,17 +1,10 @@
 "use client";
-import { Inter } from "next/font/google";
 import { useState } from "react";
 import dummyData from "@/data";
-import DataType, {
-  toggleCategoryProductListChecked,
-  filterDataFromMap,
-  selectMap,
-} from "@/types";
+import { toggleCategoryProductListChecked, selectMap } from "@/types";
 import ProductList from "../components/ProductList";
 import TotalPrice from "@/components/TotalPrice";
 import Accordion from "@/components/Accordion";
-
-const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
   const data = dummyData;
@@ -24,13 +17,11 @@ export default function Home() {
 
   return (
     <main className={""}>
-      <div className="sticky z-30 top-0 p-5 min-h-48 backdrop-blur-sm">
-        <TotalPrice
-          products={data}
-          itemsChecked={itemsChecked}
-          toggleItem={setProductSelectTrue}
-        />
-      </div>
+      <TotalPrice
+        products={data}
+        itemsChecked={itemsChecked}
+        toggleItem={setProductSelectTrue}
+      />
       <Accordion
         items={data.data.map((catData, catId) => {
           return {
