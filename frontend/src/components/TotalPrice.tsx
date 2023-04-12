@@ -59,7 +59,7 @@ const DownloadFormat: FC<{
                     {price === 0 && "*"}
                   </Typography>
                   <Typography className="text-right" variant="h6">
-                    {price !== 0 ? price : "ASK"}
+                    {price !== 0 ? price.toFixed(2) : "ASK"}
                   </Typography>
                 </li>
               ))}
@@ -71,7 +71,10 @@ const DownloadFormat: FC<{
       )}
       <div className="border-2 shadow">
         <div className="flex justify-between">
-          <Typography variant="lead">Total:</Typography>
+          <div className="flex items-baseline">
+            <Typography variant="lead">Total:</Typography>
+            <Typography variant="small">&nbsp;(inc GST)</Typography>
+          </div>
           <Typography variant="lead">
             {total.toFixed(2)}
             {hasZeroPriceData && <sup>**</sup>}
@@ -195,7 +198,7 @@ const TotalPrice: FC<{
           name: c.category,
           products: c.products.map((p) => ({
             name: p.name,
-            price: p.price,
+            price: p.price * (1 + c.gst / 100),
           })),
         }))}
       />
