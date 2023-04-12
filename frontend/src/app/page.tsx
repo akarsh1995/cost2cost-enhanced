@@ -10,6 +10,7 @@ import TotalPrice from "@/components/TotalPrice";
 import Accordion from "@/components/Accordion";
 import DataType from "@/types";
 import axios from "axios";
+import SimpleFooter from "@/components/Footer";
 
 const Main: FC<{ productData: DataType }> = ({ productData }) => {
   const data = productData;
@@ -24,31 +25,36 @@ const Main: FC<{ productData: DataType }> = ({ productData }) => {
     );
 
   return data.data.length > 0 ? (
-    <main className={""}>
-      <TotalPrice
-        products={data}
-        itemsChecked={itemsChecked}
-        toggleItem={setProductSelectTrue}
-      />
-      <Accordion
-        items={data.data.map((catData, catId) => {
-          return {
-            heading: catData.category,
-            item: (
-              <div key={`${catId}_${catData.category}`}>
-                <ProductList
-                  selectedProductsMask={itemsChecked.data[catId].products}
-                  setItemsChecked={(productId: number) =>
-                    setProductSelectTrue(catId, productId)
-                  }
-                  categoryData={catData}
-                />
-              </div>
-            ),
-          };
-        })}
-      />
-    </main>
+    <>
+      <main>
+        <TotalPrice
+          products={data}
+          itemsChecked={itemsChecked}
+          toggleItem={setProductSelectTrue}
+        />
+        <div className="p-5">
+          <Accordion
+            items={data.data.map((catData, catId) => {
+              return {
+                heading: catData.category,
+                item: (
+                  <div key={`${catId}_${catData.category}`}>
+                    <ProductList
+                      selectedProductsMask={itemsChecked.data[catId].products}
+                      setItemsChecked={(productId: number) =>
+                        setProductSelectTrue(catId, productId)
+                      }
+                      categoryData={catData}
+                    />
+                  </div>
+                ),
+              };
+            })}
+          />
+        </div>
+      </main>
+      <SimpleFooter />
+    </>
   ) : (
     <></>
   );
@@ -65,14 +71,21 @@ export default function Home() {
       });
   }, []);
 
-  return productData.data.length === 0 ? (
-    <div className="w-screen h-screen flex items-center justify-center">
-      <div
-        className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
-        role="status"
-      ></div>
-    </div>
-  ) : (
-    <Main productData={productData} />
+  return (
+    <>
+      {productData.data.length === 0 ? (
+        <div className="w-screen h-screen flex flex-col items-center justify-between">
+          <div className="flex justify-center items-center h-full">
+            <div
+              className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+              role="status"
+            ></div>
+          </div>
+          <SimpleFooter />
+        </div>
+      ) : (
+        <Main productData={productData} />
+      )}
+    </>
   );
 }
