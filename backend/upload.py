@@ -1,4 +1,4 @@
-from logging import debug, info
+from logging import info
 import sys
 from google.cloud import storage
 
@@ -8,8 +8,7 @@ def upload_blob_from_memory(bucket_name, contents, destination_blob_name):
     storage_client = storage.Client()
     bucket = storage_client.bucket(bucket_name)
     blob = bucket.blob(destination_blob_name)
-    blob.make_public()
-    blob.upload_from_string(contents)
+    blob.upload_from_string(contents, predefined_acl="publicRead")
     info(f"{destination_blob_name} with contents {contents} uploaded to {bucket_name}.")
 
 
