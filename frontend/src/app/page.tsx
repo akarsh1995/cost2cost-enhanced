@@ -1,31 +1,22 @@
 "use client";
-import { useEffect, useState } from "react";
-import { toggleCategoryProductListChecked, selectMap } from "@/types";
+import { FC, useEffect, useState } from "react";
+import {
+  toggleCategoryProductListChecked,
+  selectMap,
+  SelectMapType,
+} from "@/types";
 import ProductList from "../components/ProductList";
 import TotalPrice from "@/components/TotalPrice";
 import Accordion from "@/components/Accordion";
 import DataType from "@/types";
-import axios, { Axios } from "axios";
+import axios from "axios";
 
-export default function Home() {
-  const [data, setData] = useState({
-    data: [],
-  });
-
-  const [itemsChecked, setItemsChecked] = useState(
-    selectMap({
-      data: [],
-    })
-  );
-
-  useEffect(() => {
-    axios
-      .get(process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000")
-      .then((response) => {
-        setData(response.data);
-        setItemsChecked(selectMap(response.data));
-      });
-  }, []);
+const Main: FC<{ productData: DataType }> = ({ productData }) => {
+  const data = productData;
+  const [itemsChecked, setItemsChecked]: [
+    itemsChecked: SelectMapType,
+    setItemsChecked: (data: SelectMapType) => void
+  ] = useState(selectMap(productData));
 
   const setProductSelectTrue = (catId: number, prodId: number) =>
     setItemsChecked(
@@ -60,5 +51,28 @@ export default function Home() {
     </main>
   ) : (
     <></>
+  );
+};
+
+export default function Home() {
+  const [productData, setproductData] = useState({ data: [] });
+
+  useEffect(() => {
+    axios
+      .get(process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000")
+      .then(({ data }) => {
+        setproductData(data);
+      });
+  }, []);
+
+  return productData.data.length === 0 ? (
+    <div className="w-screen h-screen flex items-center justify-center">
+      <div
+        className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+        role="status"
+      ></div>
+    </div>
+  ) : (
+    <Main productData={productData} />
   );
 }
