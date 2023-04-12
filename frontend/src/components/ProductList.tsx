@@ -8,7 +8,7 @@ const ProductList: FC<{
   categoryData: CategoryType;
 }> = ({ selectedProductsMask, setItemsChecked, categoryData }) => {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 ">
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
       {categoryData.products.map((prod, i) => {
         const isChecked = selectedProductsMask[i];
         const id = `${categoryData.category}${i}`;

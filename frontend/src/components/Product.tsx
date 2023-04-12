@@ -9,7 +9,7 @@ const Product: FC<{
 }> = ({ isChecked, prodId, onToggle, label }) => {
   return (
     <div key={prodId}>
-      <div className="flex items-center">
+      <div className="flex items-center shadow">
         <Checkbox
           className="h-7 w-7"
           type="checkbox"

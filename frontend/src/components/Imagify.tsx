@@ -54,7 +54,7 @@ const Imagify: React.FC<{ children: ReactNode }> = ({ children }) => {
         onClick={onButtonClick}
       >
         <DownloadIcon className="mr-2 block w-6 h-6" />
-        LIST
+        Download
       </Button>
     </>
   );

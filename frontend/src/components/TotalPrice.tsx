@@ -69,7 +69,7 @@ const DownloadFormat: FC<{
           <></>
         )
       )}
-      <div className="border-2 shadow">
+      <div className="border-2 shadow p-3">
         <div className="flex justify-between">
           <div className="flex items-baseline">
             <Typography variant="lead">Total:</Typography>
