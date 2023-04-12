@@ -169,10 +169,10 @@ def get_pricelist_json(request):
         return ("Only Get Method Allowed", METHOD_NOT_ALLOWED, {})
     r = get_pricelist_json_out()
     upload_blob_from_memory(
-        os.environ["BUCKET_ID"],
-        r[0],
-        "price.json",
-        {"Content-Type": "application/json", "Content-Encoding": "gzip"},
+        bucket_name=os.environ["BUCKET_ID"],
+        gzip_data=r[0],
+        destination_blob_name="price.json",
+        content_type="application/json",
     )
     return ({"status": "successfuly uploaded to storage"}, 200, {})
 
