@@ -7,9 +7,8 @@ steps:
   - get_pricelist_json
   - --gen2
   - --region=us-central1
+  - --set-env-vars=PROD=True
   - --source=./backend
   - --allow-unauthenticated
   - --trigger-http
   - --runtime=python310
-  env:
-  - 'PROD=True'
