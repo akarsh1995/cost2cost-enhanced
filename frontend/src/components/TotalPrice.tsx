@@ -9,6 +9,7 @@ import {
 } from "@material-tailwind/react";
 
 import { NavListItem, NavbarIconButton } from "./Navbar";
+import Imagify from "./Imagify";
 
 const Cb: FC<{
   id: string;
@@ -36,6 +37,58 @@ const Cb: FC<{
         </div>
       }
     />
+  );
+};
+
+const DownloadFormat: FC<{
+  total: number;
+  hasZeroPriceData: boolean;
+  category: { name: string; products: { name: string; price: number }[] }[];
+}> = ({ total, hasZeroPriceData, category }) => {
+  return (
+    <div className="w-96 bg-white space-y-4 p-3">
+      {category.map((c) =>
+        c.products.length > 0 ? (
+          <div className="space-y-1">
+            <Typography variant="h5">{c.name}</Typography>
+            <ul>
+              {c.products.map(({ name, price }) => (
+                <li className="flex justify-between">
+                  <Typography>
+                    {name}
+                    {price === 0 && "*"}
+                  </Typography>
+                  <Typography className="text-right" variant="h6">
+                    {price !== 0 ? price : "ASK"}
+                  </Typography>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : (
+          <></>
+        )
+      )}
+      <div className="border-2 shadow">
+        <div className="flex justify-between">
+          <Typography variant="lead">Total:</Typography>
+          <Typography variant="lead">
+            {total.toFixed(2)}
+            {hasZeroPriceData && <sup>**</sup>}
+          </Typography>
+        </div>
+        {hasZeroPriceData && (
+          <>
+            <Typography variant="small">
+              * Price to be asked directly from the seller
+            </Typography>
+            <Typography variant="small">
+              ** Doesn't include prices marked "ASK"
+            </Typography>
+          </>
+        )}
+      </div>
+    </div>
   );
 };
 
@@ -101,7 +154,7 @@ const TotalPrice: FC<{
   );
 
   const AskPriceMark = () =>
-    anyDataZeroPriceSelected ? (
+    containsZeroPriceData ? (
       <div className="flex justify-end">
         <Typography variant="h6" color="blue-gray">
           * Ask the price on store. Not included in total
@@ -113,7 +166,7 @@ const TotalPrice: FC<{
 
   var s = 0;
 
-  const anyDataZeroPriceSelected = hasZeroPriceData(products, itemsChecked);
+  const containsZeroPriceData = hasZeroPriceData(products, itemsChecked);
   const filteredProducts: DataType = filterDataFromMap(products, itemsChecked);
   filteredProducts.data.forEach((c) =>
     c.products.forEach((p) => (s += p.price * (1 + c.gst / 100)))
@@ -128,15 +181,28 @@ const TotalPrice: FC<{
           </Typography>
           <Typography variant="h4">{s.toFixed(2)}</Typography>
         </div>
+
         <div className="flex items-center gap-4">
           <div className="mr-4 hidden lg:block">
             <NavList />
             <AskPriceMark />
           </div>
+          <Imagify>
+            <DownloadFormat
+              total={s}
+              hasZeroPriceData={containsZeroPriceData}
+              category={filterDataFromMap(data, itemsChecked).data.map((c) => ({
+                name: c.category,
+                products: c.products.map((p) => ({
+                  name: p.name,
+                  price: p.price,
+                })),
+              }))}
+            />
+          </Imagify>
           <NavbarIconButton setOpenNav={setOpenNav} openNav={openNav} />
         </div>
       </div>
-
       <MobileNav open={openNav}>
         <NavList />
         <AskPriceMark />
