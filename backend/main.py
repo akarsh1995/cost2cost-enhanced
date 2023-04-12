@@ -165,16 +165,15 @@ def get_pricelist_json(request):
     return get_pricelist_json_out()
 
 
-if __name__ == "__main__":
-    if not prod:
-        from flask import Flask
+if not prod:
+    from flask import Flask
 
-        app = Flask(__name__)
+    app = Flask(__name__)
 
-        @app.route("/")
-        def serve_get_pricelist():
-            return (
-                get_pricelist(),
-                200,
-                {"Access-Control-Allow-Origin": "*"},
-            )
+    @app.route("/")
+    def serve_get_pricelist():
+        return (
+            get_pricelist(),
+            200,
+            {"Access-Control-Allow-Origin": "*"},
+        )
