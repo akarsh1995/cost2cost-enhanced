@@ -3,6 +3,7 @@ from logging import info
 import sys
 from typing import Optional
 from google.cloud import storage
+from google.cloud.storage.blob import os
 
 
 def upload_blob_from_memory(
@@ -29,6 +30,7 @@ def upload_blob_from_memory(
         predefined_acl="publicRead",
         content_type=content_type,
     )
+    blob.metadata = {"Access-Control-Allow-Origin": os.environ["ACCESS_CONTROL_ORIGIN"]}
     info(
         f"{destination_blob_name} with contents {text_data} uploaded to {bucket_name}."
     )
