@@ -25,12 +25,12 @@ def upload_blob_from_memory(
     bucket = storage_client.bucket(bucket_name)
     blob = bucket.blob(destination_blob_name)
     blob.content_encoding = "gzip"
+    blob.metadata = {"Access-Control-Allow-Origin": os.environ["ACCESS_CONTROL_ORIGIN"]}
     blob.upload_from_string(
         data,
         predefined_acl="publicRead",
         content_type=content_type,
     )
-    blob.metadata = {"Access-Control-Allow-Origin": os.environ["ACCESS_CONTROL_ORIGIN"]}
     info(
         f"{destination_blob_name} with contents {text_data} uploaded to {bucket_name}."
     )
