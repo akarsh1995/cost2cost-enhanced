@@ -9,6 +9,9 @@ from pypdf import PdfReader
 from ast import literal_eval
 from io import BytesIO
 import json
+from flask import Flask
+
+app = Flask(__name__)
 
 prod = literal_eval(os.environ["PROD"])
 
@@ -131,8 +134,15 @@ def visitor_body(text: str, cm, tm, fontDict, fontSize):
             current_product.price = clean_price(text)
 
 
-# Register an HTTP function with the Functions Framework
-def get_pricelist_json():
+@app.route("/")
+def get_pricelist():
+    global categorised_products
+    global current_product
+    global category
+    categorised_products = CategorisedProducts()
+    current_product = Product()
+    category = Category()
+
     if prod:
         with urlopen("http://www.costtocost.in/list/pricelist.pdf") as u:
             data = u.read()
@@ -142,7 +152,16 @@ def get_pricelist_json():
     for page in reader.pages:
         page.extract_text(visitor_text=visitor_body)
     categorised_products.data[-1].add_product(current_product)
-    return_json = json.dumps(asdict(categorised_products))
+    return (
+        asdict(categorised_products),
+        200,
+        {"Access-Control-Allow-Origin": "*"},
+    )
+
+
+# Register an HTTP function with the Functions Framework
+def get_pricelist_json():
+    return_json = json.dumps(get_pricelist())
     headers = {"Access-Control-Allow-Origin": "*", "Content-type": "application/json"}
     return (return_json, 200, headers)
 
@@ -152,8 +171,3 @@ def get_pricelist_json_gcloud(request):
     if request.method != "GET":
         return ("Only Get Method Allowed", METHOD_NOT_ALLOWED, {})
     return get_pricelist_json()
-
-
-if __name__ == "__main__":
-    if not prod:
-        Path("./data/out.json").write_text(get_pricelist_json()[0])

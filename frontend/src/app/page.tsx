@@ -1,21 +1,38 @@
 "use client";
-import { useState } from "react";
-import dummyData from "@/data";
+import { useEffect, useState } from "react";
 import { toggleCategoryProductListChecked, selectMap } from "@/types";
 import ProductList from "../components/ProductList";
 import TotalPrice from "@/components/TotalPrice";
 import Accordion from "@/components/Accordion";
+import DataType from "@/types";
+import axios, { Axios } from "axios";
 
 export default function Home() {
-  const data = dummyData;
-  const [itemsChecked, setItemsChecked] = useState(selectMap(dummyData));
+  const [data, setData] = useState({
+    data: [],
+  });
+
+  const [itemsChecked, setItemsChecked] = useState(
+    selectMap({
+      data: [],
+    })
+  );
+
+  useEffect(() => {
+    axios
+      .get(process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000")
+      .then((response) => {
+        setData(response.data);
+        setItemsChecked(selectMap(response.data));
+      });
+  }, []);
 
   const setProductSelectTrue = (catId: number, prodId: number) =>
     setItemsChecked(
       toggleCategoryProductListChecked(itemsChecked, catId, prodId)
     );
 
-  return (
+  return data.data.length > 0 ? (
     <main className={""}>
       <TotalPrice
         products={data}
@@ -41,5 +58,7 @@ export default function Home() {
         })}
       />
     </main>
+  ) : (
+    <></>
   );
 }

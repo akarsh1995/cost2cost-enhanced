@@ -1,6 +1,5 @@
 import React, { FC, ReactNode } from "react";
 import DataType, { SelectMapType, filterDataFromMap } from "@/types";
-import data from "@/data";
 import {
   Navbar,
   Checkbox,
@@ -47,13 +46,13 @@ const DownloadFormat: FC<{
 }> = ({ total, hasZeroPriceData, category }) => {
   return (
     <div className="w-96 bg-white space-y-4 p-3">
-      {category.map((c) =>
+      {category.map((c, ci) =>
         c.products.length > 0 ? (
-          <div className="space-y-1">
+          <div key={`${ci}`} className="space-y-1">
             <Typography variant="h5">{c.name}</Typography>
             <ul>
-              {c.products.map(({ name, price }) => (
-                <li className="flex justify-between">
+              {c.products.map(({ name, price }, pi) => (
+                <li key={`${ci}_${pi}`} className="flex justify-between">
                   <Typography>
                     {name}
                     {price === 0 && "*"}
@@ -66,7 +65,7 @@ const DownloadFormat: FC<{
             </ul>
           </div>
         ) : (
-          <></>
+          <React.Fragment key={`${ci}`}></React.Fragment>
         )
       )}
       <div className="border-2 shadow p-3">
@@ -142,7 +141,7 @@ const TotalPrice: FC<{
     return c.products.map((p, pId) => {
       const key = `${c.category}${pId}`;
       const isChecked = fetchStatus(catId, pId, itemsChecked);
-      const isPriceZero = data.data[catId].products[pId].price == 0;
+      const isPriceZero = products.data[catId].products[pId].price == 0;
       return isChecked ? (
         <NavListItem key={key}>
           <div className="flex items-center">
@@ -194,7 +193,7 @@ const TotalPrice: FC<{
       <DownloadFormat
         total={s}
         hasZeroPriceData={containsZeroPriceData}
-        category={filterDataFromMap(data, itemsChecked).data.map((c) => ({
+        category={filterDataFromMap(products, itemsChecked).data.map((c) => ({
           name: c.category,
           products: c.products.map((p) => ({
             name: p.name,
