@@ -18,7 +18,7 @@ const ProductList: FC<{
             onToggle={() => setItemsChecked(i)}
             isChecked={isChecked}
             prodId={id}
-            label={`${prod.name}`}
+            label={`${prod.name}${prod.price === 0 ? "*" : ""}`}
           />
         );
       })}
