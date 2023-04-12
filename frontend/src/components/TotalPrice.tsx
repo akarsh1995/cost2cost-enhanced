@@ -109,6 +109,19 @@ const hasZeroPriceData = (data: DataType, selectedMask: SelectMapType) => {
   return false;
 };
 
+const containsAnyData = (data: DataType, selectedMask: SelectMapType) => {
+  for (let index = 0; index < selectedMask.data.length; index++) {
+    const category = selectedMask.data[index];
+    for (let pi = 0; pi < category.products.length; pi++) {
+      const productIsSelected = category.products[pi];
+      if (productIsSelected) {
+        return true;
+      }
+    }
+  }
+  return false;
+};
+
 const TotalPrice: FC<{
   products: DataType;
   itemsChecked: SelectMapType;
@@ -167,9 +180,26 @@ const TotalPrice: FC<{
   var s = 0;
 
   const containsZeroPriceData = hasZeroPriceData(products, itemsChecked);
+  const anyData = containsAnyData(products, itemsChecked);
   const filteredProducts: DataType = filterDataFromMap(products, itemsChecked);
   filteredProducts.data.forEach((c) =>
     c.products.forEach((p) => (s += p.price * (1 + c.gst / 100)))
+  );
+
+  const DownloadButton = () => (
+    <Imagify>
+      <DownloadFormat
+        total={s}
+        hasZeroPriceData={containsZeroPriceData}
+        category={filterDataFromMap(data, itemsChecked).data.map((c) => ({
+          name: c.category,
+          products: c.products.map((p) => ({
+            name: p.name,
+            price: p.price,
+          })),
+        }))}
+      />
+    </Imagify>
   );
 
   return (
@@ -187,19 +217,7 @@ const TotalPrice: FC<{
             <NavList />
             <AskPriceMark />
           </div>
-          <Imagify>
-            <DownloadFormat
-              total={s}
-              hasZeroPriceData={containsZeroPriceData}
-              category={filterDataFromMap(data, itemsChecked).data.map((c) => ({
-                name: c.category,
-                products: c.products.map((p) => ({
-                  name: p.name,
-                  price: p.price,
-                })),
-              }))}
-            />
-          </Imagify>
+          {anyData && <DownloadButton />}
           <NavbarIconButton setOpenNav={setOpenNav} openNav={openNav} />
         </div>
       </div>

@@ -1,4 +1,4 @@
-import { Typography } from "@material-tailwind/react";
+import { Checkbox, Typography } from "@material-tailwind/react";
 import { FC } from "react";
 
 const Product: FC<{
@@ -10,20 +10,19 @@ const Product: FC<{
   return (
     <div key={prodId}>
       <div className="flex items-center">
-        <input
+        <Checkbox
           className="h-7 w-7"
           type="checkbox"
           id={prodId}
           name={prodId}
           checked={isChecked}
           onChange={onToggle}
-        />{" "}
-        &nbsp; &nbsp;
-        <label htmlFor={prodId}>
-          <Typography variant={isChecked ? "h6" : "paragraph"}>
-            {label}
-          </Typography>
-        </label>
+          label={
+            <Typography variant={isChecked ? "h6" : "paragraph"}>
+              {label}
+            </Typography>
+          }
+        />
       </div>
     </div>
   );
