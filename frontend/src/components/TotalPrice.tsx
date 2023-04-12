@@ -85,7 +85,7 @@ const DownloadFormat: FC<{
               * Price to be asked directly from the seller
             </Typography>
             <Typography variant="small">
-              ** Doesn't include prices marked "ASK"
+              ** Doesn&apos;t include prices marked &quot;ASK&quot;
             </Typography>
           </>
         )}
