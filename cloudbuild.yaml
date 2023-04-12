@@ -9,6 +9,5 @@ steps:
   - --region=us-central1
   - --set-env-vars=PROD=True,BUCKET_ID=cost2cost-storage
   - --source=./backend
-  - --allow-unauthenticated
   - --trigger-http
   - --runtime=python310
