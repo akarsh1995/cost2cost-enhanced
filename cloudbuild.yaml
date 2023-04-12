@@ -6,6 +6,7 @@ steps:
   - deploy
   - get_pricelist_json
   - --gen2
+  - --region=us-central1
   - --source=./backend
   - --allow-unauthenticated
   - --trigger-http
