@@ -163,7 +163,7 @@ const TotalPrice: FC<{
   });
 
   const NavList = () => (
-    <ul className="mb-4 mt-2 grid grid-cols-4 gap-2 lg:mb-0 lg:mt-0 lg:items-center">
+    <ul className="mb-4 mt-2 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-2 lg:mb-0 lg:mt-0 lg:items-center">
       {prods_}
     </ul>
   );
