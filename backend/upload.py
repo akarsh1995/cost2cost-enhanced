@@ -1,7 +1,6 @@
 import gzip
 from logging import info
 import sys
-from typing import Optional
 from google.cloud import storage
 from google.cloud.storage.blob import os
 
@@ -25,7 +24,6 @@ def upload_blob_from_memory(
     bucket = storage_client.bucket(bucket_name)
     blob = bucket.blob(destination_blob_name)
     blob.content_encoding = "gzip"
-    blob.metadata = {"Access-Control-Allow-Origin": os.environ["ACCESS_CONTROL_ORIGIN"]}
     blob.upload_from_string(
         data,
         predefined_acl="publicRead",
