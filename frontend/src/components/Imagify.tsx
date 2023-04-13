@@ -39,7 +39,9 @@ const Imagify: React.FC<{ children: ReactNode }> = ({ children }) => {
         console.log(err);
       })
       .finally(() => {
-        ref.current.hidden = initialVisibility;
+        if (ref.current) {
+          ref.current.hidden = initialVisibility;
+        }
       });
   }, [ref]);
   const [hideModal, setHideModal] = useState(true);
