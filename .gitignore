@@ -178,3 +178,4 @@ pyrightconfig.json
 .env.fish
 backend/data
 backend/.gcloudignore
+backend/cors.json
