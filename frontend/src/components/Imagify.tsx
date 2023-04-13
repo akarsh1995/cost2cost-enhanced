@@ -22,11 +22,12 @@ const DownloadIcon: FC<{ className: string }> = ({ className }) => (
 const Imagify: React.FC<{ children: ReactNode }> = ({ children }) => {
   const ref = useRef<HTMLDivElement>(null);
 
-  const onButtonClick = useCallback(() => {
+  const onDownload = useCallback(() => {
     if (ref.current === null) {
       return;
     }
-
+    const initialVisibility = ref.current.hidden;
+    ref.current.hidden = false;
     toPng(ref.current, { cacheBust: true })
       .then((dataUrl) => {
         const link = document.createElement("a");
@@ -36,6 +37,9 @@ const Imagify: React.FC<{ children: ReactNode }> = ({ children }) => {
       })
       .catch((err) => {
         console.log(err);
+      })
+      .finally(() => {
+        ref.current.hidden = initialVisibility;
       });
   }, [ref]);
   const [hideModal, setHideModal] = useState(true);
@@ -51,7 +55,7 @@ const Imagify: React.FC<{ children: ReactNode }> = ({ children }) => {
         className="flex items-center"
         onMouseEnter={onShowModal}
         onMouseLeave={onHideModal}
-        onClick={onButtonClick}
+        onClick={onDownload}
       >
         <DownloadIcon className="mr-2 block w-6 h-6" />
         Download
