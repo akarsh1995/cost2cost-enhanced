@@ -1,4 +1,4 @@
-import React, { FC, ReactNode } from "react";
+import React, { FC } from "react";
 import DataType, { SelectMapType, filterDataFromMap } from "@/types";
 import {
   Navbar,
