@@ -7,6 +7,8 @@
 import asyncio
 import json
 import os
+from dataclasses import dataclass, field
+from datetime import datetime
 from pathlib import Path
 from random import choice
 from typing import Iterable, List, Optional, TypedDict
@@ -61,3 +63,23 @@ async def fetch_all(
 
 def create_new_session(loop: asyncio.AbstractEventLoop):
     return aiohttp.ClientSession(loop=loop)
+
+
+@dataclass
+class Product:
+    title: str
+    price: int = 0
+    url: str = ""
+    image_url: str = ""
+    vendor: str = ""
+    category: str = ""
+    timestamp: datetime = field(default_factory=datetime.now)
+
+    @staticmethod
+    def clean_price(price):
+        if price:
+            return int(price.replace(",", "").replace("₹", "").strip())
+        return 0
+
+    def to_db(self):
+        pass

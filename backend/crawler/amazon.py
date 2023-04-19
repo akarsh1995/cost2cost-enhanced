@@ -2,7 +2,7 @@ import logging
 from dataclasses import dataclass, field
 from typing import Dict, List
 
-from crawler import loop, user_agents
+from crawler import Product, loop, user_agents
 from crawler.duckduckgo import DuckDuckGo
 from crawler.utils import RetryRequest, parse_all_text_from_xpath_return
 from lxml import html
@@ -40,7 +40,7 @@ XPATHS = {
             "root": '//div[@data-asin]//div[contains(@cel_widget_id, "MAIN-SEARCH_RESULTS")]',
             "children": {
                 "title": 'span[contains(@class, "a-size-medium")]',
-                "price": 'span[@class="a-price"]',
+                "price": 'span[@class="a-price-whole"]',
                 "image": 'img[@class="s-image"]',
             },
         },
@@ -58,7 +58,7 @@ class ProductDetailPage:
         return {
             "title": self.get_title(),
             "price": self.get_price(),
-            "image": self.get_image(),
+            "image_url": self.get_image_url(),
         }
 
     def get_title(self) -> str:
@@ -71,7 +71,7 @@ class ProductDetailPage:
             self.root_elem.xpath(f".//{self.xpath['price']}")
         ).strip()
 
-    def get_image(self) -> str:
+    def get_image_url(self) -> str:
         images = self.root_elem.xpath(self.image_xpath)
         if images:
             return images[0].get("src")
@@ -92,20 +92,24 @@ class MultipleProductPage:
             price = parse_all_text_from_xpath_return(
                 product_section.xpath(f".//{self.xpath['price']}")
             ).strip()
-            __import__("pdb").set_trace()
 
-            image = ""
+            image_url = ""
             images = product_section.xpath(f".//{self.xpath['image']}")
             if images:
-                image = images[0].get("src")
+                image_url = images[0].get("src")
             l.append(
                 {
                     "title": title,
                     "price": price,
-                    "image": image,
+                    "image_url": image_url,
                 }
             )
         return l
+
+
+@dataclass
+class AmazonProduct(Product):
+    vendor: str = field(default="amazon")
 
 
 @dataclass
@@ -114,20 +118,22 @@ class AmazonCrawl(RetryRequest):
     product_link: str = field(default="", init=False)
     request_name = "amazon crawl"
 
-    async def crawl_using_ddg(self, category, vendor, product, **kwargs):
+    async def crawl_using_ddg(self, category, brand, product, **kwargs):
         ddg_query = DuckDuckGo(
-            f"{category} {vendor} {product}", filter_domain="amazon.in", **kwargs
+            f"{category} {brand} {product}", filter_domain="amazon.in", **kwargs
         )
         results = await ddg_query.search(kwargs["headers"])
         if results:
             self.product_link = results[0].href
-        return await self.fetch_html_page(self.product_link)
+        return await self.fetch_product_deatils(category, self.product_link)
 
-    async def fetch_html_page(self, product_link: str):
+    async def fetch_product_deatils(self, category: str, product_link: str):
         response_text = await self.get(product_link, headers=HEADERS)
         if response_text:
             self.root_elem = html.fromstring(response_text)
-        return self.get_product_details()
+        return AmazonProduct(
+            **self.get_product_details(), url=product_link, category=category
+        )
 
     def get_product_details(self) -> Dict[str, str]:
         if self._is_multiple_product_search_page():
@@ -158,23 +164,6 @@ class AmazonCrawl(RetryRequest):
                 f"Looks like this link is not a product detail page. link: {self.product_link}"
             )
         return ProductDetailPage(product_detail_page[0])
-
-
-# @dataclass
-# class AmazonProduct:
-#     title: str
-#     price: int = 0
-#     url: str = ""
-#     image_url: str = ""
-#     vendor: str = "amazon"
-#     category: str = "cpu"
-#     timestamp: datetime = field(default_factory=datetime.now)
-
-#     @staticmethod
-#     def clean_price(price):
-#         if price:
-#             return int(price.replace(",", "").replace("₹", "").strip())
-#         return 0
 
 
 # def write_to(to="db", path: PathLike = "amazon_prods.csv"):
@@ -215,10 +204,10 @@ if __name__ == "__main__":
     import json
 
     ac = AmazonCrawl()
-    # res = loop.run_until_complete(ac.crawl_using_ddg("cpu", "intel", "i5-11400"))
     res = loop.run_until_complete(
-        ac.fetch_html_page(
-            "https://www.amazon.in/s/ref=nb_sb_noss?url=search-alias%3Daps&field-keywords=i5"
+        ac.fetch_product_deatils(
+            "cpu",
+            "https://www.amazon.in/s/ref=nb_sb_noss?url=search-alias%3Daps&field-keywords=i5",
         )
     )
     print(res)

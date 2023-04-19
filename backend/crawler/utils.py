@@ -6,9 +6,10 @@ from typing import List
 from lxml.html import HtmlElement
 
 
-def parse_all_text_from_xpath_return(elem: List[HtmlElement]) -> str:
-    if elem:
-        return " ".join(map(lambda x: x.strip(), elem[0].itertext()))
+def parse_all_text_from_xpath_return(elems: List[HtmlElement]) -> str:
+    text_list = [" ".join(map(lambda x: x.strip(), elem.itertext())) for elem in elems]
+    if elems:
+        return " ".join(text_list)
     else:
         return ""
 
