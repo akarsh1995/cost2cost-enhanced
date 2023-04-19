@@ -31,20 +31,30 @@ class RespType(TypedDict):
     text: str
 
 
-async def fetch(
-    session: aiohttp.ClientSession, url: str, headers: Optional[dict] = None
-) -> RespType:
-    session.headers.add(USER_AGENT, choice(user_agents)["ua"])
-    session.headers.update(headers or {})
-    async with session.get(url) as response:
-        return {"status": response.status, "text": await response.text()}
+loop = asyncio.get_event_loop()
+
+client = aiohttp.ClientSession(loop=loop)
+
+
+async def fetch(url: str, headers: Optional[dict] = None) -> aiohttp.ClientResponse:
+    custom_headers = {}
+    custom_headers.update({USER_AGENT: choice(user_agents)["ua"]} | (headers or {}))
+    return await client.get(url, headers=custom_headers)
+
+
+async def post(url: str, headers: Optional[dict] = None) -> aiohttp.ClientResponse:
+    custom_headers = {}
+    custom_headers.update({USER_AGENT: choice(user_agents)["ua"]} | (headers or {}))
+    return await client.post(url, headers=custom_headers)
 
 
 async def fetch_all(
-    urls: Iterable[str], description: str, session: aiohttp.ClientSession
+    urls: Iterable[str],
+    description: str,
+    headers: None,
 ) -> List[RespType]:
     results = await tqdm_asyncio.gather(
-        *[fetch(session, url) for url in urls], desc=description
+        *[fetch(url, headers) for url in urls], desc=description
     )
     return results
 
