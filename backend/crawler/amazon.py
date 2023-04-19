@@ -92,10 +92,12 @@ class MultipleProductPage:
             price = parse_all_text_from_xpath_return(
                 product_section.xpath(f".//{self.xpath['price']}")
             ).strip()
+            __import__("pdb").set_trace()
+
             image = ""
             images = product_section.xpath(f".//{self.xpath['image']}")
             if images:
-                image = images[0].get("href")
+                image = images[0].get("src")
             l.append(
                 {
                     "title": title,
@@ -213,5 +215,10 @@ if __name__ == "__main__":
     import json
 
     ac = AmazonCrawl()
-    res = loop.run_until_complete(ac.crawl_using_ddg("cpu", "intel", "i5-11400"))
+    # res = loop.run_until_complete(ac.crawl_using_ddg("cpu", "intel", "i5-11400"))
+    res = loop.run_until_complete(
+        ac.fetch_html_page(
+            "https://www.amazon.in/s/ref=nb_sb_noss?url=search-alias%3Daps&field-keywords=i5"
+        )
+    )
     print(res)

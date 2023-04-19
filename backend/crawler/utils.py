@@ -1,7 +1,7 @@
 import asyncio
 import logging
 from random import random
-from typing import Iterable, List
+from typing import List
 
 from lxml.html import HtmlElement
 
@@ -39,7 +39,13 @@ class RetryRequest:
                 "{self.request_name}. Retrying {self._current_try + 1} time."
             )
             await asyncio.sleep(2**self._current_try + random() * 5)
-            return await self._request(url, headers)
+            self._current_try += 1
+            return await self._request(
+                url,
+                headers,
+                max_tries=max_tries,
+                is_get=is_get,
+            )
         else:
             return ""
 
@@ -51,14 +57,14 @@ class RetryRequest:
         return await self._request(url, headers, max_tries)
 
 
-async def main():
-    async with client as _:
-        r = RetryRequest()
-        res = await r.get("https://jsonplaceholder.typicode.com/todos/1")
-        print(res)
-
-
 if __name__ == "__main__":
+
+    async def main():
+        async with client as _:
+            r = RetryRequest()
+            res = await r.get("https://jsonplaceholder.typicode.com/todos/1")
+            print(res)
+
     from crawler import client, loop
 
     loop.run_until_complete(main())
